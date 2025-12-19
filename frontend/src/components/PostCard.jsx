@@ -1,10 +1,16 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
+// Functional Component to display a Single Post
+// Props: 'post' (data), 'onDelete', 'onLike', 'onDislike' (parent functions)
 const PostCard = ({ post, onDelete, onLike, onDislike }) => {
+    // Get current logged-in user to check ownership
     const { user } = useContext(AuthContext);
+    
+    // Check: Is the current user the author of this post?
     const isOwner = user && user.id === post.user.id;
 
+    // State for Image Modal (LightBox)
     const [showModal, setShowModal] = React.useState(false);
 
     const styles = {
@@ -72,6 +78,7 @@ const PostCard = ({ post, onDelete, onLike, onDislike }) => {
             borderTop: '1px solid #E5E7EB',
             paddingTop: '1rem',
         },
+        // Dynamic style for buttons based on active state
         actionButton: (isActive, color) => ({
             display: 'flex',
             alignItems: 'center',
@@ -125,6 +132,7 @@ const PostCard = ({ post, onDelete, onLike, onDislike }) => {
 
     return (
         <div style={styles.card}>
+            {/* Modal for viewing Full Size Image */}
             {showModal && (
                 <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
                     <button style={styles.closeButton} onClick={() => setShowModal(false)}>&times;</button>
@@ -137,11 +145,14 @@ const PostCard = ({ post, onDelete, onLike, onDislike }) => {
                 </div>
             )}
 
+            {/* Delete Button: Only shown if current user is the owner */}
             {isOwner && (
                 <button onClick={() => onDelete(post.id)} style={styles.deleteButton}>
                     &times;
                 </button>
             )}
+            
+            {/* Post Header: Author and Date */}
             <div style={styles.header}>
                 {post.user.profile_picture ? (
                     <img src={post.user.profile_picture} alt="Profile" style={styles.avatar} />
@@ -156,8 +167,10 @@ const PostCard = ({ post, onDelete, onLike, onDislike }) => {
                 </div>
             </div>
             
+            {/* Post Content */}
             <p style={styles.description}>{post.description}</p>
             
+            {/* Post Image (if exists) */}
             {post.image && (
                 <img 
                     src={post.image} 
@@ -167,6 +180,7 @@ const PostCard = ({ post, onDelete, onLike, onDislike }) => {
                 />
             )}
             
+            {/* Action Buttons: Like, Dislike */}
             <div style={styles.actions}>
                 <button onClick={() => onLike(post.id)} style={styles.actionButton(post.is_liked, '#2563EB')}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill={post.is_liked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">

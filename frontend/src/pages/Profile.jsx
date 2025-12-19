@@ -6,34 +6,49 @@ import PostCreate from '../components/PostCreate';
 import PostCard from '../components/PostCard';
 
 const Profile = () => {
+    // Get User Data from Global Context
     const { user, setUser, loading: authLoading } = useContext(AuthContext);
+    
+    // Local State for Posts List and Loading Status
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    
+    // State to toggle Edit Mode for Name and Date of Birth
     const [editMode, setEditMode] = useState({ name: false, dob: false });
+    
+    // State to hold profile update form data
     const [formData, setFormData] = useState({
         first_name: '',
         last_name: '',
         date_of_birth: '',
     });
+    
+    // Ref for hidden file input (for clicking the profile picture to upload)
     const fileInputRef = useRef(null);
-    const [filter, setFilter] = useState('my'); // 'all' or 'my'
+    
+    // Filter State: 'all' (Feed) or 'my' (Only my posts)
+    const [filter, setFilter] = useState('my'); 
+    
     const navigate = useNavigate();
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const isMobile = windowWidth < 768;
 
 
+    // Effect: Handle Window Resize for Responsiveness
     useEffect(() => {
         const handleResize = () => setWindowWidth(window.innerWidth);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    // Effect: Redirect to Login if specific User is not found (Protected Route)
     useEffect(() => {
         if (!authLoading && !user) {
             navigate('/login');
         }
     }, [user, authLoading, navigate]);
 
+    // Effect: Initialize Form Data and Fetch Posts when User loads
     useEffect(() => {
         if (user) {
             setFormData({
@@ -43,11 +58,13 @@ const Profile = () => {
             });
             fetchPosts();
         }
-    }, [user, filter]);
+    }, [user, filter]); // Re-run when User changes or Filter changes
 
+    // Function to Fetch Posts from API
     const fetchPosts = async () => {
         try {
             let url = 'posts/';
+            // Apply logic for filtering 'My Posts'
             if (filter === 'my') {
                 if (!user) return;
                 url += `?user_id=${user.id}`;

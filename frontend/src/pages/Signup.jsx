@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 
 const Signup = () => {
+    // State to hold all the input values
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -11,41 +12,53 @@ const Signup = () => {
         date_of_birth: '',
         profile_picture: null
     });
+    // State to show the image preview before uploading
     const [preview, setPreview] = useState(null);
+    // State to handle validation errors
     const [error, setError] = useState('');
+    // Hook to navigate to different pages (e.g. Login after success)
     const navigate = useNavigate();
 
+    // Generic handler for input changes
     const handleChange = (e) => {
+        // Special handling for File Input
         if (e.target.name === 'profile_picture') {
             const file = e.target.files[0];
             setFormData({ ...formData, profile_picture: file });
+            // Generate a local URL to show the image preview immediately
             if (file) {
                 setPreview(URL.createObjectURL(file));
             }
         } else {
+            // Standard handling for Text Inputs
             setFormData({ ...formData, [e.target.name]: e.target.value });
         }
     };
 
+    // Submitting the form to the Backend
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
+        e.preventDefault(); // Stop page reload
+        setError(''); // Clear previous errors
 
+        // CLIENT-SIDE VALIDATION: Check passwords match
         if (formData.password !== formData.confirmPassword) {
             setError("Passwords do not match");
             return;
         }
 
+        // CLIENT-SIDE VALIDATION: Check Password Strength using Regex
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
         if (!passwordRegex.test(formData.password)) {
             setError("Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character (!@#$%^&*)");
             return;
         }
 
+        // Split Full Name into First and Last Name for the backend
         const nameParts = formData.fullName.trim().split(' ');
         const firstName = nameParts[0];
         const lastName = nameParts.slice(1).join(' ') || '';
 
+        // Prepare FormData object (Necessary for sending Images)
         const data = new FormData();
         data.append('email', formData.email);
         data.append('password', formData.password);
@@ -55,11 +68,13 @@ const Signup = () => {
         if (formData.profile_picture) data.append('profile_picture', formData.profile_picture);
 
         try {
+            // Send POST request to '/signup/'
             await api.post('signup/', data, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    'Content-Type': 'multipart/form-data', // Crucial for file uploads
                 },
             });
+            // On Success: Redirect to Login
             navigate('/login');
         } catch (err) {
             setError('Signup failed. Please check your inputs.');

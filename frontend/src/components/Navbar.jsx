@@ -2,14 +2,18 @@ import React, { useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
+// Navigation Bar Component
+// Displayed on top of every page
 const Navbar = () => {
+    // Get User status and Logout function from Context
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Handle User Logout
     const handleLogout = () => {
-        logout();
-        navigate('/login');
+        logout(); // Clear tokens
+        navigate('/login'); // Redirect to Login page
     };
 
     const styles = {

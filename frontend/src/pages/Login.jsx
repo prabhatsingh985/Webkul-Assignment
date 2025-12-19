@@ -3,16 +3,21 @@ import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const Login = () => {
+    // Local state for form inputs
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    
+    // Access the Global Auth Context to get the 'login' function
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            // Retrieve tokens from backend via Context
             await login(email, password);
+            // On success, go to Profile
             navigate('/profile');
         } catch (err) {
             setError('Login failed. Please check your credentials.');

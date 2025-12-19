@@ -1,21 +1,31 @@
 import React, { useState } from 'react';
 import api from '../api';
 
+// Functional Component to Create a New Post
+// Props: 'onPostCreated' - callback function to refresh the feed after posting
 const PostCreate = ({ onPostCreated }) => {
+    // State for Text Content
     const [description, setDescription] = useState('');
+    // State for Image File Object (to send to backend)
     const [image, setImage] = useState(null);
+    // State for Image Preview URL (to show to user)
     const [imagePreview, setImagePreview] = useState(null);
 
+    // Handle File Selection
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             setImage(file);
+            // Create a temporary URL to preview the selected image
             setImagePreview(URL.createObjectURL(file));
         }
     };
 
+    // Handle Form Submission
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Stop page reload
+        
+        // Prepare FormData (Required for uploading files)
         const formData = new FormData();
         formData.append('description', description);
         if (image) {
@@ -23,14 +33,19 @@ const PostCreate = ({ onPostCreated }) => {
         }
 
         try {
+            // Send POST request to '/posts/'
             await api.post('posts/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+            
+            // Clear Form on Success
             setDescription('');
             setImage(null);
             setImagePreview(null);
+            
+            // Trigger the parent component to reload posts
             onPostCreated();
         } catch (error) {
             console.error("Failed to create post", error);
